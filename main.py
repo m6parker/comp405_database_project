@@ -4,11 +4,13 @@ connection = sqlite3.connect('projectDB.sqlite')
 cursor_obj = connection.cursor()
 
 
-def all_search(param):
+def all_search():
     sql = """SELECT book.title FROM book"""
     print("\nALL BOOKS\n------------------------")
     for row in cursor_obj.execute(sql):
         print(str(row).strip("(,')"))
+
+    ask_to_continue()
 
 
 def author_search():
@@ -21,7 +23,7 @@ def author_search():
     # prompts user for an author
     param = input("\nSelect an author to find a book (type all for all books) > ")
     if param == "all":
-        all_search(param)
+        all_search()
     else:
         print("\nBOOKS BY: " + param + "\n------------------------")
         sql = """SELECT book.title FROM book where author like ?"""
@@ -29,13 +31,15 @@ def author_search():
         for row in cursor_obj.execute(sql, (param,)):
             print(str(row).strip("(,')"))
 
+    ask_to_continue()
+
 
 def title_search():
     print("\nyou selected SEARCH BY: title")
-    # prompts user for an author
+    # prompts user for a title
     param = input("\nSearch book names to see availability and condition\n(type all for all books) > ")
     if param == "all":
-        all_search(param)
+        all_search()
     else:
         print("\nBOOK TITLES: " + param + "\n------------------------")
         sql = """SELECT book.title FROM book where title like ?"""
@@ -44,13 +48,15 @@ def title_search():
             print(str(i), ") ", (str(row).strip("(,')")))
             i = i + 1
 
+    ask_to_continue()
+
 
 def isbn_search():
     print("\nyou selected SEARCH BY: ISBN #")
-    # prompts user for an author
+    # prompts user for a number
     param = input("\nSearch book ISBN to see titles, availability, and condition\n(type all for all books) > ")
     if param == "all":
-        all_search(param)
+        all_search()
     else:
         # NEED TO FIGURE OUT HOW TO PRINT MULTIPLE COLUMNS
         print("\nBOOK ISBN: " + param + "\n------------------------")
@@ -59,6 +65,36 @@ def isbn_search():
         for row in cursor_obj.execute(sql, (param,)):
             print(str(i), ") ", (str(row).strip("(,')")))
             i = i + 1
+
+    ask_to_continue()
+
+
+def availability_search():
+    print("\nyou selected SEARCH BY: availability")
+    # prompts user for rent or buy
+    param = input("\nSearch book availability to see titles and condition\n(type rent, buy, or all) > ")
+    if param == "all":
+        all_search()
+    elif param == "rent":
+        # NEED TO FIGURE OUT HOW TO PRINT MULTIPLE COLUMNS
+        print("\nBOOKS AVAILABLE TO RENT\n------------------------")
+        sql = """SELECT book.title FROM book where availible_to=\"rent\""""
+        i = 1
+        for row in cursor_obj.execute(sql):
+            print(str(i), ") ", (str(row).strip("(,')")))
+            i = i + 1
+    elif param == "buy":
+        print("\nBOOKS AVAILABLE TO BUY:\n------------------------")
+        sql = """SELECT book.title FROM book where availible_to=\"buy\""""
+        i = 1
+        for row in cursor_obj.execute(sql):
+            print(str(i), ") ", (str(row).strip("(,')")))
+            i = i + 1
+    else:
+        print("invalid input")
+        availability_search()
+
+    ask_to_continue()
 
 
 def search_selection():
@@ -76,12 +112,22 @@ def search_selection():
         isbn_search()
 
     elif param == "4":
-        title_search()
+        availability_search()
 
     else:
         print("\ninvalid input\n")
         # resets by calling recursively
         search_selection()
+
+
+def ask_to_continue():
+    print("\n\nkeep searching or exit?")
+    param = input("select y or n >> ")
+    if param == 'y':
+        search_selection()
+    else:
+        connection.close()
+        exit()
 
 
 def welcome():
@@ -96,8 +142,6 @@ def welcome():
 def main():
     welcome()
     search_selection()
-
-    # connection.close()
 
 
 if __name__ == '__main__':
