@@ -77,18 +77,22 @@ def availability_search():
         all_search()
     elif param == "rent":
         # NEED TO FIGURE OUT HOW TO PRINT MULTIPLE COLUMNS
-        print("\nBOOKS AVAILABLE TO RENT\n------------------------")
-        sql = """SELECT book.title FROM book where availible_to=\"rent\""""
+        print("\nBOOKS AVAILABLE TO RENT                                 AUTHOR"
+              "\n-------------------------------------------------------------------------")
+        sql = """SELECT book.title, book.author FROM book where availible_to=\"rent\""""
         i = 1
         for row in cursor_obj.execute(sql):
-            print(str(i), ") ", (str(row).strip("(,')")))
+            val = 70 - len(str(row))
+            print(str(i), ") ", (str(row).strip("(,')").replace("', '", val * " ")))
             i = i + 1
     elif param == "buy":
-        print("\nBOOKS AVAILABLE TO BUY:\n------------------------")
-        sql = """SELECT book.title FROM book where availible_to=\"buy\""""
+        print("\nBOOKS AVAILABLE TO BUY                                 AUTHOR"
+              "\n--------------------------------------------------------------------------")
+        sql = """SELECT book.title, book.author FROM book where availible_to=\"buy\""""
         i = 1
         for row in cursor_obj.execute(sql):
-            print(str(i), ") ", (str(row).strip("(,')")))
+            val = 70 - len(str(row))
+            print(str(i), ") ", (str(row).strip("(,')").replace("', '", val * " ")))
             i = i + 1
     else:
         print("invalid input")
@@ -97,10 +101,30 @@ def availability_search():
     ask_to_continue()
 
 
+def add_book():
+    # INSERT INTO book VALUES(37849, "Stephen King", "Four Past Midnight", "new", "rent")
+    print('you are adding a book to the library\nplease insert these values:')
+    new_num = input('ISBN #: ')
+    new_author = input('author: ')
+    new_title = input('title: ')
+    new_con = input('condition: ')
+    new_avail = input('rent or buy: ')
+    sql2 = """INSERT INTO book VALUES(""" + new_num + """, \"""" + new_author + """\", \"""" + \
+           new_title + """\", \"""" + new_con + """\", \"""" + new_avail+"""\")"""
+    cursor_obj.execute(sql2)
+    connection.commit()
+    sql = """SELECT book.title FROM book where ISBN_num = """ + new_num
+    print("\nNEW BOOK ADDED\n------------------------")
+    for row in cursor_obj.execute(sql):
+        print(str(row).strip("(,')"))
+
+    ask_to_continue()
+
+
 def search_selection():
     print("\nSearch for a book using the following options:\n"
-          "1. Author\n2. Title\n3. ISBN #\n4. Availability\n")
-    param = input("(type 1, 2, 3, or 4) > ")
+          "1. Author\n2. Title\n3. ISBN #\n4. Availability\n5. Add book\n")
+    param = input("(type 1, 2, 3, 4 or 5) > ")
 
     if param == "1":
         author_search()
@@ -113,6 +137,9 @@ def search_selection():
 
     elif param == "4":
         availability_search()
+
+    elif param == "5":
+        add_book()
 
     else:
         print("\ninvalid input\n")
